@@ -27,7 +27,7 @@ build:
           
 docker-push:
   box:
-    id: golang
+    id: debian
   steps:
     - script:
         name: copy binaries to /opt/app
@@ -45,3 +45,45 @@ docker-push:
         tag: ${WERCKER_GIT_BRANCH}-${WERCKER_GIT_COMMIT},latest
         entrypoint: /opt/source
         port: 5000/tcp     
+
+
+deploy:
+
+  box:
+    id: debian
+
+  steps:
+
+    - script:
+        name: debug
+        code: |
+          echo $WERCKER_OUTPUT_DIR
+          ls -l $WERCKER_OUTPUT_DIR
+          echo $WERCKER_ROOT
+          ls -l $WERCKER_ROOT
+    - bash-template:
+        cwd: $WERCKER_ROOT/kubernetes/deployment
+
+    - script:
+        name: Remove template files
+        cwd: $WERCKER_ROOT/kubernetes/deployment
+        code: |
+          rm *.template.yaml
+    - script:
+        name: debug
+        cwd: $WERCKER_ROOT/kubernetes/deployment
+        code: |
+          ls -l
+    - script:
+        name: echo tags
+        code: |
+          cat $WERCKER_ROOT/kubernetes/deployment/deployment.yaml
+          echo "Docker image and tag:"
+          echo "${WERCKER_GIT_BRANCH}-${WERCKER_GIT_COMMIT}"
+          
+    - kubectl:
+        server: $KUBE_ENDPOINT
+        token: $KUBE_USER_TOKEN
+        cwd: $WERCKER_ROOT/kubernetes/deployment
+        insecure-skip-tls-verify: true
+        command: apply -f .

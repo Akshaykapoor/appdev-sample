@@ -51,12 +51,9 @@ docker-push:
 
 
 deploy:
-
   box:
-    id: debian
-
+    id: nginx:alpine
   steps:
-
     - script:
         name: debug
         code: |
@@ -66,7 +63,6 @@ deploy:
           ls -l $WERCKER_ROOT
     - bash-template:
         cwd: $WERCKER_ROOT/kubernetes/deployment
-
     - script:
         name: Remove template files
         cwd: $WERCKER_ROOT/kubernetes/deployment

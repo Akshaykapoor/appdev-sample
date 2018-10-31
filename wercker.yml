@@ -3,6 +3,11 @@
 # Read more about containers on our dev center
 # https://devcenter.wercker.com/overview-and-core-concepts/containers/
 box: nginx:alpine
+dev:
+  steps:
+    - internal/watch:
+        code: index.html
+        reload: true
 # You can also use services such as databases. Read more on our dev center:
 # https://devcenter.wercker.com/administration/services/
 # services:
@@ -39,14 +44,14 @@ docker-push:
     # For other docker repository refer to this doc: http://devcenter.wercker.com/docs/containers/pushing-containers
     - internal/docker-build:
         dockerfile: Dockerfile
-        image-name: sample-image
+        image-name: sample-webapp
     - internal/docker-push:
-        username: $CONTAINER_REGISTRY_USERNAME
-        password: $API_USER_TOKEN
+        image: sample-webapp
+        username: $DOCKER_USERNAME
+        password: $DOCKER_PASSWORD
         repository: $REPO_NAME/$APP_NAME
         registry: $PRIVATE_REGISTRY_PATH
         tag: ${WERCKER_GIT_BRANCH}-${WERCKER_GIT_COMMIT},latest
-        #entrypoint: /opt/source
         port: 80/tcp     
 
 
